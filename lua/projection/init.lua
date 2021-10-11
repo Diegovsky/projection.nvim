@@ -36,14 +36,14 @@ end
 
 function M.remove_project()
   wait_for_init()
-  local path = utils.choose(management.project_list, "Select a project:")
-  if path == nil or #path == 0 then
+  local project, index = utils.choose(management.project_list, "Select a project:")
+  if project == nil then
     return
   end
 
-  local should_remove = utils.ask('Remove path "%s" from the project list?', path)
+  local should_remove = utils.ask('Remove path "%s" from the project list?', project)
   if should_remove then
-    management.remove_project(path)
+    management.remove_project_by_index(index)
   end
 end
 

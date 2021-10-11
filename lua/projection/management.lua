@@ -17,9 +17,13 @@ function M.add_project(folder)
   end
 end
 
+function M.remove_project_by_index(index)
+  table.remove(M.project_list, index)
+end
+
 function M.remove_project(folder)
   for i, f in ipairs(M.project_list) do
-    if folder == f then
+    if folder.path == f.path then
       table.remove(M.project_list, i)
       return
     end

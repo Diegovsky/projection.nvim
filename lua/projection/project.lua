@@ -8,6 +8,7 @@ local meta ={
   end;
   __index = Project;
   __type = 'Project';
+  __len = function(self) return #self.path end,
 }
 
 function Project:from_json(json)

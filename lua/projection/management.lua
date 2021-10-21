@@ -1,5 +1,6 @@
 local M = {
-  project_list = {}
+  project_list = {},
+  has_changed = false,
 }
 
 local Project = require'projection.project'
@@ -14,6 +15,7 @@ function M.add_project(folder)
   local project = Project(folder)
   if not vim.tbl_contains(M.project_list, project) then
     table.insert(M.project_list, project)
+    M.has_changed = true
   end
 end
 
@@ -25,6 +27,7 @@ function M.remove_project(folder)
   for i, f in ipairs(M.project_list) do
     if folder.path == f.path then
       table.remove(M.project_list, i)
+      M.has_changed = true
       return
     end
   end

@@ -56,7 +56,10 @@ function M.goto_project()
 end
 
 function M.save_projects()
-  require'projection.store'.store_projects(M.store_file, management.project_list)
+  -- Only store if user has changed project list
+  if management.has_changed then
+    require'projection.store'.store_projects(M.store_file, management.project_list)
+  end
 end
 
 -- Loads all the projects asynchronously

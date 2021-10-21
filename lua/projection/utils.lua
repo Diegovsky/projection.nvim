@@ -13,7 +13,7 @@ end
 
 function M.choose(list, prompt)
   local choice, index
-  vim.ui.select(list, {prompt=prompt, format_item=tostring}, function(c, i) choice = c; i = index end)
+  vim.ui.select(list, {prompt=prompt}, function(c, i) choice = c; i = index end)
   return choice, index
 end
 return M

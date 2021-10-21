@@ -1,6 +1,7 @@
 local Project = {
   path = '';
   name = nil;
+  weight = 0;
 }
 local meta ={
  __tostring = function(self)
@@ -12,8 +13,12 @@ local meta ={
 }
 
 function Project:from_json(json)
-  assert(json.path, 'Table does not have "path" key')
-  assert(json.name, 'Table does not have "name" key')
+  local function ensure_field(obj, name)
+    assert(obj[name], ('Table does not have "%s" key'):format(name))
+  end
+  ensure_field(json, 'name')
+  ensure_field(json, 'path')
+  ensure_field(json, 'weight')
   return setmetatable(json, meta)
 end
 

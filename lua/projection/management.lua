@@ -3,6 +3,30 @@ local M = {
   has_changed = false,
 }
 
+local list_helper = {
+  -- Rebalances the most recently opened projects.
+  rebalance = function(self)
+    for _, proj in ipairs(self) do
+      local old_weight = proj.weight
+      -- Restrict weights to values between 0 and #self
+      proj.weight = math.min(#self,
+                          math.max(0, proj.weight-1))
+      -- If a project weight was changed, it should be written to disk.
+      if not M.has_changed and old_weight ~= proj.weight then
+        M.has_changed = true
+      end
+    end
+  end;
+  sort = function(self)
+    table.sort(self, function(p1, p2)
+        return p1.weight > p2.weight
+      end)
+  end
+}
+
+-- Hide helper methods from `pairs` by using a metatable with `__index` fallback.
+setmetatable(M.project_list, {__index=list_helper})
+
 local Project = require'projection.project'
 
 function M.add_projects(projs)

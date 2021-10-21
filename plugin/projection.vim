@@ -1,3 +1,0 @@
-function! ListProjects()
-    " ey"
-endfunction

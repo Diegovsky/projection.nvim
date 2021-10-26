@@ -28,7 +28,7 @@ function Project:new(path)
   path = path:gsub('/$', '')
   -- Get dir name
   local name = vim.fn.fnamemodify(path, ':t')
-  return setmetatable({path=path, name=name}, meta)
+  return setmetatable({path=path, name=name, weight=0}, meta)
 end
 
 return setmetatable(Project, {__call=Project.new})

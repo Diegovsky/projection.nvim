@@ -6,6 +6,7 @@ local M = {
 local management = require'projection.management'
 local store = require'projection.store'
 local utils = require'projection.utils'
+local workspace = require'projection.workspace'
 
 local function wait_for_init()
   if M.is_ready then
@@ -61,6 +62,7 @@ function M.goto_project()
       management.project_list:rebalance()
     end
     vim.cmd(("exec 'cd' '%s'"):format(answer.path))
+    workspace.load_settings()
   end
 end
 

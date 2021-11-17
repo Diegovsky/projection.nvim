@@ -32,7 +32,7 @@ end
 
 function M.choose(list, prompt)
   local choice, index
-  vim.ui.select(list, {prompt=prompt}, function(c, i) choice = c; i = index end)
+  vim.ui.select(list, {prompt=prompt}, function(c, i) choice = c; index = i end)
   return choice, index
 end
 

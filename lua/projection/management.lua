@@ -44,7 +44,9 @@ function M.add_project(folder)
 end
 
 function M.remove_project_by_index(index)
+  assert(index)
   table.remove(M.project_list, index)
+  M.has_changed = true
 end
 
 function M.remove_project(folder)

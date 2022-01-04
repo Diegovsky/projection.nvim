@@ -10,11 +10,35 @@ Project management for neovim.
 Plug 'Diegovsky/projection.nvim'
 ```
 
+## Features
+ - Basic project management
+   - Add a new project
+   - Remove a project
+   - Go to project
+   - Recently opened projects (`should_sort=true`)
+
+Note: If you want vscode-like workspace local settings, consider also using [direnv](https://github.com/direnv/direnv.vim).
+
 ## Setup
+Add this to your neovim config file (init.lua):
 ```lua
 -- To use the default settings
 require'projection'.init()
 ```
+
+init.vim:
+```vim
+" To use the default settings
+lua require'projection'.init()
+```
+
+### Possible settings
+The function `projection.init` takes an optional table with the following keys:
+| Name | Default Value | Description |
+| ---- | ------------- | ----------- |
+| store_file | `$XDG_STATE_HOME/projects.json` | Where Projection.nvim will save your projects |
+| should_sort | `false` | Whether Projection.nvim should sort the projects by most recent access |
+| should_title | `true` | Whether Projection.nvim should change the terminal title to reflect currently opened project |
 
 ## How-to
 ```lua

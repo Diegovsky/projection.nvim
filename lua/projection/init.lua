@@ -2,6 +2,8 @@ local M = {
   is_ready = false;
   is_loading = false;
   should_sort = false;
+  should_title = true;
+  store_file = require'projection.utils'.default_project_store_path();
 }
 local management = require'projection.management'
 local store = require'projection.store'
@@ -62,7 +64,10 @@ function M.goto_project()
       management.project_list:rebalance()
     end
     vim.cmd(("exec 'cd' '%s'"):format(answer.path))
-    workspace.load_settings()
+    if M.should_title then
+      vim.o.title = true
+      utils.set_title(answer.name)
+    end
   end
 end
 
@@ -75,19 +80,28 @@ function M.save_projects(force)
   end
 end
 
+local function set_prop(tbl, name)
+  local prop = tbl[name]
+  if prop ~= nil then
+    return prop
+  else
+    return M[name]
+  end
+end
+
 -- Loads all the projects asynchronously
--- @param t.store_file The file to load the project list (Default: see utils.default_project_store_path)
--- @param t.enable_sorting Whether the project list should place the most accessed projects first.
+-- @param t.store_file string @comment The file to load the project list (Default: see utils.default_project_store_path)
+-- @param t.should_sort boolean @comment Whether the project list should place the most accessed projects first.
+-- @param t.should_title boolean @comment Whether neovim should change the terminal title to the project name.
 function M.init(t)
   t = t or {}
-  M.should_sort = t.enable_sorting or false
+  set_prop(t, 'store_file')
+  set_prop(t, 'should_sort')
+  set_prop(t, 'should_title')
   if not M.is_ready and not M.is_loading then
-    local store_file = t.store_file or require'projection.utils'.default_project_store_path()
-    M.store_file = store_file
-
     require'plenary.async'.run(function()
         M.is_loading = true
-        local success, projects = pcall(store.load_projects, store_file)
+        local success, projects = pcall(store.load_projects, M.store_file)
         if success then
           management.add_projects(projects)
         end

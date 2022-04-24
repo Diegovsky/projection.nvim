@@ -1,6 +1,4 @@
-local M = {
-  last_auname = nil
-}
+local M = { }
 
 --- Wraps a function and caches it's return value.
 --- @param f function
@@ -32,31 +30,17 @@ function M.ask(text, ...)
   return vim.trim(ans):lower():sub(1, 1) == 'y'
 end
 
-function M.choose(list, prompt)
-  local choice, index
-  vim.ui.select(list, {prompt=prompt}, function(c, i) choice = c; index = i end)
-  return choice, index
-end
-
 function M.set_title(name)
   vim.cmd(('set titlestring=%s'):format(name))
-  if M.last_auname then
-    -- Delete augroup
-    vim.cmd(([[
-    :augroup %s 
-    :  au!
-    :augroup END
-    :augroup! %s
-      ]]):format(M.last_auname, M.last_auname))
-  end
   local auname = 'Projection#'..name
-  vim.cmd(([[
-  :augroup %s 
-  :  au!
-  :  au BufEnter * :exe 'set' 'titlestring=%s'
-  :augroup END
-    ]]):format(auname, name))
-  M.last_auname = auname
+  local augroup = vim.api.nvim_create_augroup(auname, {clear=true})
+  vim.api.nvim_create_autocmd('BufEnter', {
+      group = augroup,
+    pattern = "*";
+    callback = function ()
+        vim.go.titlestring=name
+    end
+  })
 end
 
 return M

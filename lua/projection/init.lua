@@ -1,14 +1,18 @@
 local M = {
   is_ready = false;
   is_loading = false;
-  should_sort = false;
-  should_title = true;
+  default_options = {
+    should_sort = true;
+    should_title = true;
+  };
+  options = {
+
+  };
   store_file = require'projection.utils'.default_project_store_path();
 }
 local management = require'projection.management'
 local store = require'projection.store'
 local utils = require'projection.utils'
-local workspace = require'projection.workspace'
 
 local function wait_for_init()
   if M.is_ready then
@@ -41,34 +45,34 @@ end
 
 function M.remove_project()
   wait_for_init()
-  local project, index = utils.choose(management.project_list, "Select a project:")
-  if project == nil then
-    return
-  end
+  management.choose_project("Select a project:", function (project, index)
+    local should_remove = utils.ask('Remove path "%s" from the project list?', project)
 
-  local should_remove = utils.ask('Remove path "%s" from the project list?', project)
-  if should_remove then
-    management.remove_project_by_index(index)
-  end
+    if should_remove then
+      management.remove_project_by_index(index)
+    end
+
+  end)
 end
 
 function M.goto_project()
   wait_for_init()
-  if M.should_sort then
+  if M.options.should_sort then
     management.project_list:sort()
   end
-  local answer = utils.choose(management.project_list, "Go to:")
-  if answer then
-    if M.should_sort then
-      answer.weight = #management.project_list
-      management.project_list:rebalance()
+  management.choose_project("Go to:", function (answer)
+    if answer then
+      if M.options.should_sort then
+        answer.weight = #management.project_list
+        management.project_list:rebalance()
+      end
+      vim.cmd(("exec 'cd' '%s'"):format(answer.path))
+      if M.options.should_title then
+        vim.o.title = true
+        utils.set_title(answer.name)
+      end
     end
-    vim.cmd(("exec 'cd' '%s'"):format(answer.path))
-    if M.should_title then
-      vim.o.title = true
-      utils.set_title(answer.name)
-    end
-  end
+  end)
 end
 
 function M.save_projects(force)
@@ -80,24 +84,17 @@ function M.save_projects(force)
   end
 end
 
-local function set_prop(tbl, name)
-  local prop = tbl[name]
-  if prop ~= nil then
-    return prop
-  else
-    return M[name]
-  end
-end
+---@class InitArgs
+--- @param store_file string @comment The file to load the project list
+--- @param should_sort boolean @comment Whether the project list should place the most accessed projects first.
+--- @param should_title boolean @comment Whether neovim should change the terminal title to the project name.
+local _decl
 
 -- Loads all the projects asynchronously
--- @param t.store_file string @comment The file to load the project list (Default: see utils.default_project_store_path)
--- @param t.should_sort boolean @comment Whether the project list should place the most accessed projects first.
--- @param t.should_title boolean @comment Whether neovim should change the terminal title to the project name.
+--- @param t InitArgs
 function M.init(t)
-  t = t or {}
-  set_prop(t, 'store_file')
-  set_prop(t, 'should_sort')
-  set_prop(t, 'should_title')
+  vim.tbl_extend('keep', t, M.default_options)
+  M.options = t
   if not M.is_ready and not M.is_loading then
     require'plenary.async'.run(function()
         M.is_loading = true
@@ -110,7 +107,7 @@ function M.init(t)
         M.is_ready = true
         M.is_loading = false
         -- Save project list on exit.
-        vim.cmd("au VimLeavePre * :lua require'projection'.save_projects()")
+        vim.api.nvim_create_autocmd("VimLeavePre", {pattern="*", desc="Save your project list on exit", callback=require'projection'.save_projects})
       end)
   end
 end

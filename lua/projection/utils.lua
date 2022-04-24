@@ -32,30 +32,21 @@ function M.ask(text, ...)
   return vim.trim(ans):lower():sub(1, 1) == 'y'
 end
 
-function M.choose(list, prompt)
-  local choice, index
-  vim.ui.select(list, {prompt=prompt}, function(c, i) choice = c; index = i end)
-  return choice, index
-end
-
 function M.set_title(name)
+  print('a')
   vim.cmd(('set titlestring=%s'):format(name))
   if M.last_auname then
-    -- Delete augroup
-    vim.cmd(([[
-    :augroup %s 
-    :  au!
-    :augroup END
-    :augroup! %s
-      ]]):format(M.last_auname, M.last_auname))
+    vim.api.nvim_del_augroup_by_name(M.last_auname)
   end
   local auname = 'Projection#'..name
-  vim.cmd(([[
-  :augroup %s 
-  :  au!
-  :  au BufEnter * :exe 'set' 'titlestring=%s'
-  :augroup END
-    ]]):format(auname, name))
+  vim.api.nvim_create_augroup(auname)
+  vim.api.nvim_create_autocmd('BufEnter', {
+    pattern = "*";
+    callback = function ()
+      print('pog')
+      vim.lo.titlestring=name
+    end
+  })
   M.last_auname = auname
 end
 
